@@ -34,3 +34,5 @@ lerna-debug.log*
 
 # Uploaded files
 backend/uploads/
+
+backend/*_details.xlsx
