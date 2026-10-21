@@ -42,14 +42,31 @@ exports.getAllExpense = async (req, res) => {
 }
 
 //delete Expense category
+//deletion handlers use findByIdAndDelete(req.params.id) without verifying that the record belongs to the authenticated user. The routes require authentication, but authentication alone is not authorization. 
+//Fix: Include the authenticated owner's ID in the database query, and return 404 if no matching record is found.
+
 exports.deleteExpense = async (req, res) => {
-    try{
-        await Expense.findByIdAndDelete(req.params.id);
-        res.json({message: "Expense deleted successfully"})
-    }catch(error){
-        res.status(500).json({message: "Server error"});
+    try {
+        const expense = await Expense.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if (!expense) {
+            return res.status(404).json({
+                message: "Expense not found"
+            });
+        }
+
+        return res.json({
+            message: "Expense deleted successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error"
+        });
     }
-}
+};
 
 //Download Excel
 exports.downloadExpenseExcel = async (req, res) => {
